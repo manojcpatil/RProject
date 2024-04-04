@@ -1,0 +1,48 @@
+---
+title: "Simple Linear Regression"
+author: "Yogesh Patil"
+date: "2024-04-04"
+output: word_document
+---
+
+```{r}
+#Topic 3 - Fitting of simple linear regression model
+#Polynomial regression in one variable
+rm(list=ls())
+library(MASS)
+library(Matrix)
+Y=c(650,1200,1300,430,1400,900,1800,640,793,925)
+n=length(Y)
+X1=c(2,7,9,4,12,6,9,3,3,2)
+X1=X1-mean(X1)                #for polynomial problem
+#plot(Y,X1)
+correlation=cor(X1,Y)
+X=cbind(rep(1,n),X1)
+X=cbind(rep(1,n),X1,X1^2)     #for polynomial problem
+r=rankMatrix(X)[1]  ;error_df=n-r
+S=t(X)%*%X   ;S_inv=ginv(S)   ;H=S_inv%*%S
+beta_hat=t(S_inv)%*%t(X)%*%Y
+Y_hat=X%*%beta_hat
+e=Y-Y_hat    ;SSE=t(e)%*%e    ;MSE=SSE/error_df
+SStreat=t(beta_hat)%*%t(X)%*%Y-(sum(Y)^2/n)
+MStreat=SStreat/r-1  ;Total=n-1  ;TotalSS=t(Y)%*%Y-(sum(Y)^2/n)
+F_ratio=round(MStreat/MSE,5)     ;P_value=1-pf(F_ratio,r-1,n-1)
+ANOVA=data.frame(S.V     =c("household_size","error_df","Total"),
+                 d_f     =c(r-1,n-r,n -1),
+                 SS      =c(SStreat,SSE,TotalSS),
+                 MSS     =c(MStreat,MSE,"-"),
+                 F.ratio =c(F_ratio,"-","-"),
+                 Pvalue  =c(P_value,"-","-"))
+ANOVA
+sprintf("correlation between X1 and Y =%f",correlation);
+sprintf("Sum of Square of Error(SSE) =%0.5f",P_value);
+sprintf("Mean Sum of Square of Error(Error Variance) =%f",MSE);
+
+
+plot(Y,X1)
+lines(Y_hat,X1)
+
+
+summary(lm(Y~X))
+
+```
